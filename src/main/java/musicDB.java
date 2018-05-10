@@ -339,7 +339,7 @@ public class musicDB {
         if (results.next()) {
             return results.getInt(1);
         } else {
-            //insert tye artist
+            //insert the artist
             insertIntoArtists.setString(1, name);
             int affectedRows = insertIntoArtists.executeUpdate();
 
