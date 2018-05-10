@@ -8,14 +8,14 @@ import java.util.Vector;
 
 public class musicGUI extends JFrame {
     private JPanel mainPanel;
+    private JPanel displayPanel;
     private JButton showAllSongsButton;
     private JButton showAllAlbumsButton;
     private JButton showAllArtistsButton;
-    private JPanel dataEntryPanel;
-    private JTextField songTitle;
-    private JButton addSongButton;
-    private JPanel displayPanel;
     private JTable displayTable;
+
+    private JPanel dataEntryPanel;
+    private JButton addSongButton;
     private JTextField titleTextField;
     private JTextField trackTextField;
     private JTextField albumTextField;
@@ -36,30 +36,20 @@ public class musicGUI extends JFrame {
         pack();
 
         setVisible(true);
+        //Set up JTable
+
+        displayTable.setGridColor(Color.BLACK);
+
+       //Enable sorting
+
+        displayTable.setAutoCreateRowSorter(true);
 
         showAllArtistsButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
-                //Set up JTable
-
-                displayTable.setGridColor(Color.BLACK);
-
-//                JScrollPane sp=new JScrollPane(displayTable);
-                //Enable sorting
-
-                displayTable.setAutoCreateRowSorter(true);
-
-
                 columnNames = db.getArtistColumnNames();
-
-
                 Vector data = db.queryAllArtists();
-
-
                 // Custom methods for DefaultTableModel
-
-
                 tableModel = new DefaultTableModel( data, columnNames);
                 updateArtistTable();
                 displayTable.setModel(tableModel);
@@ -69,23 +59,9 @@ public class musicGUI extends JFrame {
         showAllAlbumsButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                displayTable.setGridColor(Color.BLACK);
-
-//
-                //Enable sorting
-
-                displayTable.setAutoCreateRowSorter(true);
-
-
                 columnNames = db.getAlbumsColumnNames();
-
-
                 Vector data = db.queryAllAlbums();
-
-
                 // Custom methods for DefaultTableModel
-
-
                 tableModel = new DefaultTableModel( data, columnNames);
                 updateAlbumsTable();
                 displayTable.setModel(tableModel);
@@ -94,27 +70,12 @@ public class musicGUI extends JFrame {
         showAllSongsButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                displayTable.setGridColor(Color.BLACK);
-
-//
-                //Enable sorting
-
-                displayTable.setAutoCreateRowSorter(true);
-
-
                 columnNames = db.getSongsColumnNames();
-
-
                 Vector data = db.queryAllSongs();
-
-
-                // Custom methods for DefaultTableModel
-
-
+               // Custom methods for DefaultTableModel
                 tableModel = new DefaultTableModel( data, columnNames);
                 updateSongsTable();
                 displayTable.setModel(tableModel);
-
             }
         });
         addSongButton.addActionListener(new ActionListener() {
@@ -126,9 +87,9 @@ public class musicGUI extends JFrame {
     }
 
     private void addSong() {
-        String songTitle=titleTextField.getText();
-        String albumName=albumTextField.getText();
-        String artistName=artistNameTextField.getText();
+        String songTitle=titleTextField.getText().toUpperCase();
+        String albumName=albumTextField.getText().toUpperCase();
+        String artistName=artistNameTextField.getText().toUpperCase();
         String textTrackNumber=trackTextField.getText();
         if (songTitle == null || songTitle.trim().equals("")) {
             JOptionPane.showMessageDialog(mainPanel, "Please enter record info");

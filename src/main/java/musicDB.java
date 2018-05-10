@@ -29,16 +29,13 @@ public class musicDB {
     public static final int INDEX_SONG_TITLE = 3;
     public static final int INDEX_SONG_ALBUM = 4;
 
+    //get all albums
+
     private static final String QUERY_ALL_ALBUMS =
             "SELECT " + TABLE_ALBUMS + '.' + COLUMN_ALBUM_ID+", "+ TABLE_ALBUMS + '.' + COLUMN_ALBUM_NAME +", "+ TABLE_ARTISTS + '.' + COLUMN_ARTIST_NAME+ " FROM " + TABLE_ALBUMS +
                     " INNER JOIN " + TABLE_ARTISTS + " ON " + TABLE_ALBUMS + "." + COLUMN_ALBUM_ARTIST +
                     " = " + TABLE_ARTISTS + "." + COLUMN_ARTIST_ID;
-//    SELECT songs._id, songs.track, songs.title, albums.name,artists.name
-//    FROM songs
-//    INNER JOIN albums
-//    ON albums._id=songs.album
-//    INNER JOIN artists
-//    ON artists._id=albums.artist;
+//get all songs
     private static final String QUERY_ALL_SONGS =
             "SELECT " + TABLE_SONGS + '.' + COLUMN_SONG_ID+", "+ TABLE_SONGS + '.' + COLUMN_SONG_TRACK +", "+ TABLE_SONGS + '.' +
                     COLUMN_SONG_TITLE+", "+ TABLE_ALBUMS + '.' + COLUMN_ALBUM_NAME+", "+ TABLE_ARTISTS + '.' + COLUMN_ARTIST_NAME+
@@ -46,27 +43,34 @@ public class musicDB {
                     " ON " + TABLE_ALBUMS + "." + COLUMN_ALBUM_ID +" = " + TABLE_SONGS + "." + COLUMN_SONG_ALBUM+
                     " INNER JOIN " + TABLE_ARTISTS + " ON " + TABLE_ALBUMS + "." + COLUMN_ALBUM_ARTIST +
                     " = " + TABLE_ARTISTS + "." + COLUMN_ARTIST_ID;
-    //Insert a song
-    public static final String INSERT_ARTIST = "INSERT INTO " + TABLE_ARTISTS +
+    //Insert a song using prepared statements
+    private static final String INSERT_ARTIST = "INSERT INTO " + TABLE_ARTISTS +
             '(' + COLUMN_ARTIST_NAME + ") VALUES(?)";
-    public static final String INSERT_ALBUMS = "INSERT INTO " + TABLE_ALBUMS +
+    private static final String INSERT_ALBUMS = "INSERT INTO " + TABLE_ALBUMS +
             '(' + COLUMN_ALBUM_NAME + ", " + COLUMN_ALBUM_ARTIST + ") VALUES(?, ?)";
 
-    public static final String INSERT_SONGS = "INSERT INTO " + TABLE_SONGS +
+    private static final String INSERT_SONGS = "INSERT INTO " + TABLE_SONGS +
             '(' + COLUMN_SONG_TRACK + ", " + COLUMN_SONG_TITLE + ", " + COLUMN_SONG_ALBUM +
             ") VALUES(?, ?, ?)";
-    public static final String QUERY_ARTIST = "SELECT " + COLUMN_ARTIST_ID + " FROM " +
+    private static final String QUERY_ARTIST = "SELECT " + COLUMN_ARTIST_ID + " FROM " +
             TABLE_ARTISTS + " WHERE " + COLUMN_ARTIST_NAME + " = ?";
 
-    public static final String QUERY_ALBUM = "SELECT " + COLUMN_ALBUM_ID + " FROM " +
+    private static final String QUERY_ALBUM = "SELECT " + COLUMN_ALBUM_ID + " FROM " +
             TABLE_ALBUMS + " WHERE " + COLUMN_ALBUM_NAME + " = ?";
 
+//    delete a song
+    public static final String DELETE_QUERY="DELETE FROM "+TABLE_SONGS+" WHERE "+TABLE_SONGS+'.'+COLUMN_SONG_ID+" = ?";
+//prepare statements for add a song
     private PreparedStatement insertIntoArtists;
     private PreparedStatement insertIntoAlbums;
     private PreparedStatement insertIntoSongs;
     private PreparedStatement queryArtist;
     private PreparedStatement queryAlbum;
 
+//    prepare statement for delete a song
+    private PreparedStatement deleteSong;
+
+//   code didn't work without instantiation. WHY?
     private static musicDB instance=new musicDB();
 
 
@@ -81,6 +85,7 @@ public class musicDB {
 public static musicDB getInstance(){
        return instance;
 }
+//create the database
     private void setUp() {
         try (Connection connection = DriverManager.getConnection(url);
              Statement statement = connection.createStatement()) {
@@ -98,7 +103,6 @@ public static musicDB getInstance(){
             );
             statement.execute(createTableArtist);
 
-//            statement.executeUpdate("INSERT INTO artists ( name) VALUES ('Pink')");
 
 
             String createTableSongsTemplate = "CREATE TABLE IF NOT EXISTS %s (%s INTEGER PRIMARY KEY AUTOINCREMENT, %s INTEGER, %s TEXT NOT NULL, %s INTEGER)";
@@ -123,7 +127,7 @@ public static musicDB getInstance(){
             insertIntoSongs = conn.prepareStatement(INSERT_SONGS);
             queryArtist = conn.prepareStatement(QUERY_ARTIST);
             queryAlbum = conn.prepareStatement(QUERY_ALBUM);
-
+            deleteSong=conn.prepareStatement(DELETE_QUERY);
             return true;
         } catch (SQLException e) {
             System.out.println("Couldn't connect to database: " + e.getMessage());
@@ -286,47 +290,47 @@ public static musicDB getInstance(){
 
     }
 
-
-    public List<String> queryAlbumsForArtist(String artistName) {
-//        SELECT albums.name from albums
-//        INNER JOIN artists
-//        ON albums.artist=artists._id
-//        WHERE artists.name=artistName
-        StringBuilder sb = new StringBuilder("SELECT ");
-        sb.append(TABLE_ALBUMS);
-        sb.append('.');
-        sb.append(COLUMN_ALBUM_NAME);
-        sb.append(" FROM ");
-        sb.append(TABLE_ALBUMS);
-        sb.append(" INNER JOIN ");
-        sb.append(TABLE_ARTISTS);
-        sb.append(" ON ");
-        sb.append(TABLE_ALBUMS);
-        sb.append('.');
-        sb.append(COLUMN_ALBUM_ARTIST);
-        sb.append(" = ");
-        sb.append(TABLE_ARTISTS);
-        sb.append('.');
-        sb.append(COLUMN_ARTIST_ID);
-        sb.append(" WHERE ");
-        sb.append(TABLE_ARTISTS);
-        sb.append('.');
-        sb.append(COLUMN_ARTIST_NAME);
-        sb.append(" = \"");
-        sb.append(artistName);
-        sb.append("\"");
-        try (Statement statement = conn.createStatement();
-             ResultSet results = statement.executeQuery(sb.toString())) {
-            List<String> albums = new ArrayList<>();
-            while (results.next()) {
-                albums.add(results.getString(1));
-            }
-            return albums;
-        } catch (SQLException e) {
-            System.out.println("Query failed" + e.getMessage());
-            return null;
-        }
-    }
+//
+//    public List<String> queryAlbumsForArtist(String artistName) {
+////        SELECT albums.name from albums
+////        INNER JOIN artists
+////        ON albums.artist=artists._id
+////        WHERE artists.name=artistName
+//        StringBuilder sb = new StringBuilder("SELECT ");
+//        sb.append(TABLE_ALBUMS);
+//        sb.append('.');
+//        sb.append(COLUMN_ALBUM_NAME);
+//        sb.append(" FROM ");
+//        sb.append(TABLE_ALBUMS);
+//        sb.append(" INNER JOIN ");
+//        sb.append(TABLE_ARTISTS);
+//        sb.append(" ON ");
+//        sb.append(TABLE_ALBUMS);
+//        sb.append('.');
+//        sb.append(COLUMN_ALBUM_ARTIST);
+//        sb.append(" = ");
+//        sb.append(TABLE_ARTISTS);
+//        sb.append('.');
+//        sb.append(COLUMN_ARTIST_ID);
+//        sb.append(" WHERE ");
+//        sb.append(TABLE_ARTISTS);
+//        sb.append('.');
+//        sb.append(COLUMN_ARTIST_NAME);
+//        sb.append(" = \"");
+//        sb.append(artistName);
+//        sb.append("\"");
+//        try (Statement statement = conn.createStatement();
+//             ResultSet results = statement.executeQuery(sb.toString())) {
+//            List<String> albums = new ArrayList<>();
+//            while (results.next()) {
+//                albums.add(results.getString(1));
+//            }
+//            return albums;
+//        } catch (SQLException e) {
+//            System.out.println("Query failed" + e.getMessage());
+//            return null;
+//        }
+//    }
 
     //    insert artist(part of insert a song)
     private int insertArtist(String name) throws SQLException {
@@ -410,5 +414,20 @@ public static musicDB getInstance(){
             }
 
         }
+    }
+    public void deleteSong(int SongID) {
+
+        try {
+
+            deleteSong.setInt(1, SongID);
+
+            deleteSong.executeUpdate();
+
+        } catch (SQLException e) {
+
+            throw new RuntimeException(e);
+
+        }
+
     }
 }
