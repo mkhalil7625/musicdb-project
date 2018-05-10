@@ -25,7 +25,7 @@ public class Controller {
 //
 //        }
 ////        call queryAlbumsForArtist
-//        List<String> albumsForArtist= datasource.queryAlbumsForArtist("Iron Maiden");
+//        List<String> albumsForArtist= datasource.queryAlbumsForArtist("");
 //                for(String ar:albumsForArtist){
 //                    System.out.println(ar);
 //                }

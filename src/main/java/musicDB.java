@@ -35,7 +35,7 @@ public class musicDB {
             "SELECT " + TABLE_ALBUMS + '.' + COLUMN_ALBUM_ID+", "+ TABLE_ALBUMS + '.' + COLUMN_ALBUM_NAME +", "+ TABLE_ARTISTS + '.' + COLUMN_ARTIST_NAME+ " FROM " + TABLE_ALBUMS +
                     " INNER JOIN " + TABLE_ARTISTS + " ON " + TABLE_ALBUMS + "." + COLUMN_ALBUM_ARTIST +
                     " = " + TABLE_ARTISTS + "." + COLUMN_ARTIST_ID;
-//get all songs
+    //get all songs
     private static final String QUERY_ALL_SONGS =
             "SELECT " + TABLE_SONGS + '.' + COLUMN_SONG_ID+", "+ TABLE_SONGS + '.' + COLUMN_SONG_TRACK +", "+ TABLE_SONGS + '.' +
                     COLUMN_SONG_TITLE+", "+ TABLE_ALBUMS + '.' + COLUMN_ALBUM_NAME+", "+ TABLE_ARTISTS + '.' + COLUMN_ARTIST_NAME+
@@ -58,19 +58,19 @@ public class musicDB {
     private static final String QUERY_ALBUM = "SELECT " + COLUMN_ALBUM_ID + " FROM " +
             TABLE_ALBUMS + " WHERE " + COLUMN_ALBUM_NAME + " = ?";
 
-//    delete a song
+    //    delete a song
     public static final String DELETE_QUERY="DELETE FROM "+TABLE_SONGS+" WHERE "+TABLE_SONGS+'.'+COLUMN_SONG_ID+" = ?";
-//prepare statements for add a song
+    //prepare statements for add a song
     private PreparedStatement insertIntoArtists;
     private PreparedStatement insertIntoAlbums;
     private PreparedStatement insertIntoSongs;
     private PreparedStatement queryArtist;
     private PreparedStatement queryAlbum;
 
-//    prepare statement for delete a song
+    //    prepare statement for delete a song
     private PreparedStatement deleteSong;
 
-//   code didn't work without instantiation. WHY?
+    //   code didn't work without instantiation. WHY?
     private static musicDB instance=new musicDB();
 
 
@@ -79,13 +79,13 @@ public class musicDB {
 
 //    public static void main(String[] args)throws SQLException {
 
-   public musicDB() {
+    public musicDB() {
         setUp();
     }
-public static musicDB getInstance(){
-       return instance;
-}
-//create the database
+    public static musicDB getInstance(){
+        return instance;
+    }
+    //create the database
     private void setUp() {
         try (Connection connection = DriverManager.getConnection(url);
              Statement statement = connection.createStatement()) {
@@ -121,7 +121,7 @@ public static musicDB getInstance(){
     public boolean open() {
         try {
             conn = DriverManager.getConnection(url);
-//            insert a song
+//            insert the prepared statments to the open method to cereate the instances to insert a song
             insertIntoArtists = conn.prepareStatement(INSERT_ARTIST, Statement.RETURN_GENERATED_KEYS);
             insertIntoAlbums = conn.prepareStatement(INSERT_ALBUMS, Statement.RETURN_GENERATED_KEYS);
             insertIntoSongs = conn.prepareStatement(INSERT_SONGS);
@@ -383,9 +383,11 @@ public static musicDB getInstance(){
     public void insertSong(String title, String artist, String album, int track) {
 
         try {
+//            set the autocommit to false to execute the entire code as a one a transaction
             conn.setAutoCommit(false);
-
+//add the artist name if new
             int artistId = insertArtist(artist);
+//            add the album name if new
             int albumId = insertAlbum(album, artistId);
             insertIntoSongs.setInt(1, track);
             insertIntoSongs.setString(2, title);
@@ -403,7 +405,7 @@ public static musicDB getInstance(){
                 System.out.println("Performing rollback");
                 conn.rollback();
             } catch(SQLException e2) {
-                System.out.println("Oh boy! Things are really bad! " + e2.getMessage());
+                System.out.println("What did you do?!! " + e2.getMessage());
             }
         } finally {
             try {
